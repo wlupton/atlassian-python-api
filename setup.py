@@ -10,7 +10,7 @@ versionFile = os.path.join(HERE, "VERSION")
 
 buildNumber = "0"
 
-assert sys.version_info >= (3, 2), 'Python 3.2+ required.'
+assert sys.version_info >= (3, 2), 'Python 3.2+ required. Version found: %s' % sys.version_info
 
 _base_version = "0.15.{buildNumber}"
 
