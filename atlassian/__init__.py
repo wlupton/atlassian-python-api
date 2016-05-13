@@ -9,10 +9,11 @@ log = logging.getLogger("atlassian")
 
 class AtlassianRestAPI:
 
-    def __init__(self, url, username, password):
+    def __init__(self, url, username, password, verifySSL=True):
         self.url = url
         self.username = username
         self.password = password
+        self.verifySSL = verifySSL
 
     def log_curl_debug(self, method, path, data=None, headers={}, level=logging.DEBUG):
         message = "curl --silent -X {method} -u '{username}':'{password}' -H {headers} {data} '{url}'".format(
@@ -44,7 +45,8 @@ class AtlassianRestAPI:
             headers=headers,
             data=json.dumps(data),
             auth=(self.username, self.password),
-            timeout=60)
+            timeout=60,
+            verify=self.verifySSL)
         if response.status_code == 200:
             log.debug('Received: {0}'.format(response.json()))
         elif response.status_code == 204:
