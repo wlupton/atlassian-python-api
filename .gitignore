@@ -1,2 +1,4 @@
 *.pyc
 .sonarlint
+/.idea
+/env
