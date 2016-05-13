@@ -2,4 +2,5 @@
 .sonarlint
 /.idea
 /env
+/examples/scratchpad.py
 *.log
