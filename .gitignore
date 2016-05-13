@@ -2,3 +2,4 @@
 .sonarlint
 /.idea
 /env
+*.log
