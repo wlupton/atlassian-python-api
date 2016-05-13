@@ -2,5 +2,7 @@
 .sonarlint
 /.idea
 /env
+/BUILD_NUMBER
+/VERSION
 /examples/scratchpad.py
 *.log
