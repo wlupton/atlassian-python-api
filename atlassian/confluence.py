@@ -96,4 +96,3 @@ class Confluence(AtlassianRestAPI):
             url=result['_links']['tinyui']))
 
         return result
-

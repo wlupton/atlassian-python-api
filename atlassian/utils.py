@@ -1,6 +1,7 @@
 import logging
 import re
 
+# flake8: noqa
 
 log = logging.getLogger('atlassian.utils')
 
@@ -37,7 +38,11 @@ def html_email(email, title=None):
 def html_list(data):
     """
     >>> html_list(['example.com', 'admin1@example.com', 'admin2@example.com'])
-    '<ul><li>example.com</li><li><a href="mailto:admin1@example.com">admin1@example.com</a></li><li><a href="mailto:admin2@example.com">admin2@example.com</a></li></ul>'
+    '<ul>
+    <li>example.com</li>
+    <li><a href="mailto:admin1@example.com">admin1@example.com</a></li>
+    <li><a href="mailto:admin2@example.com">admin2@example.com</a></li>
+    </ul>'
     """
     html = '<ul>'
 

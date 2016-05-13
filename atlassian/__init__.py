@@ -1,14 +1,19 @@
 import json
 import logging
-from urllib.parse import urlencode, urljoin
 import requests
-
+from urllib.parse import urlencode, urljoin
+from .confluence import Confluence
+from .jira import Jira
+from .stash import Stash
+from .portfolio import Portfolio
+from .bamboo import Bamboo
 
 log = logging.getLogger("atlassian")
 
+__all__ = ['Confluence', 'Jira', 'Stash', 'Portfolio', 'Bamboo']
+
 
 class AtlassianRestAPI:
-
     def __init__(self, url, username, password, verifySSL=True):
         self.url = url
         self.username = username
@@ -57,7 +62,8 @@ class AtlassianRestAPI:
             response.raise_for_status()
         return response
 
-    def get(self, path, data=None, flags=None, params=None, headers={'Content-Type': 'application/json', 'Accept': 'application/json'}):
+    def get(self, path, data=None, flags=None, params=None,
+            headers={'Content-Type': 'application/json', 'Accept': 'application/json'}):
         return self.request('GET', path=path, flags=flags, params=params, data=data, headers=headers).json()
 
     def post(self, path, data=None, headers={'Content-Type': 'application/json', 'Accept': 'application/json'}):
@@ -78,15 +84,7 @@ class AtlassianRestAPI:
         """
         Deletes resources at given paths.
         :rtype: dict
-        :return: Empty dictionary to have consistent interface. Some of Atlassian rest resources don't return any content.
+        :return: Empty dictionary to have consistent interface. Some of Atlassian rest resources don't return any
+        content.
         """
         self.request('DELETE', path=path, data=data, headers=headers)
-
-
-from .confluence import Confluence
-from .jira import Jira
-from .stash import Stash
-from .portfolio import Portfolio
-from .bamboo import Bamboo
-
-__all__ = ['Confluence', 'Jira', 'Stash', 'Portfolio', 'Bamboo']

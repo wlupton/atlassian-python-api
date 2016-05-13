@@ -70,7 +70,8 @@ class Stash(AtlassianRestAPI):
         return self.get(url)['values']
 
     def get_diff(self, project, repository, path, hash_oldest, hash_newest):
-        url = '/rest/api/1.0/projects/{project}/repos/{repository}/compare/diff/{path}?from={hash_oldest}&to={hash_newest}'.format(
+        url = ('/rest/api/1.0/projects/{project}/repos/{repository}/'
+               'compare/diff/{path}?from={hash_oldest}&to={hash_newest}').format(
             project=project,
             repository=repository,
             path=path,
@@ -79,7 +80,8 @@ class Stash(AtlassianRestAPI):
         return self.get(url)['diffs']
 
     def get_commits(self, project, repository, hash_oldest, hash_newest, limit=99999):
-        url = '/rest/api/1.0/projects/{project}/repos/{repository}/commits?since={hash_oldest}&until={hash_newest}&limit={limit}'.format(
+        url = ('/rest/api/1.0/projects/{project}/repos/{repository}/'
+               'commits?since={hash_oldest}&until={hash_newest}&limit={limit}').format(
             project=project,
             repository=repository,
             hash_from=hash_oldest,
@@ -88,7 +90,8 @@ class Stash(AtlassianRestAPI):
         return self.get(url)['values']
 
     def get_changelog(self, project, repository, ref_from, ref_to, limit=99999):
-        url = '/rest/api/1.0/projects/{project}/repos/{repository}/compare/commits?from={ref_from}&to={ref_to}&limit={limit}'.format(
+        url = ('/rest/api/1.0/projects/{project}/repos/{repository}/'
+               'compare/commits?from={ref_from}&to={ref_to}&limit={limit}').format(
             project=project,
             repository=repository,
             ref_from=ref_from,
