@@ -2,8 +2,6 @@
 Atlassian Python API wrapper
 ============================
 
-.. image:: https://pypip.in/d/atlassian-python-api/badge.png
-
 For users
 =========
 
