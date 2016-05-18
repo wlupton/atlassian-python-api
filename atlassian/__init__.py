@@ -2,15 +2,10 @@ import json
 import logging
 import requests
 from urllib.parse import urlencode, urljoin
-from .confluence import Confluence
-from .jira import Jira
-from .stash import Stash
-from .portfolio import Portfolio
-from .bamboo import Bamboo
+
+# flake8: noqa
 
 log = logging.getLogger("atlassian")
-
-__all__ = ['Confluence', 'Jira', 'Stash', 'Portfolio', 'Bamboo']
 
 
 class AtlassianRestAPI:
@@ -88,3 +83,12 @@ class AtlassianRestAPI:
         content.
         """
         self.request('DELETE', path=path, data=data, headers=headers)
+
+# NO_QA
+from .confluence import Confluence
+from .jira import Jira
+from .stash import Stash
+from .portfolio import Portfolio
+from .bamboo import Bamboo
+
+__all__ = ['Confluence', 'Jira', 'Stash', 'Portfolio', 'Bamboo']
