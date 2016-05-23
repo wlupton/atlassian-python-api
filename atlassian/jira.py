@@ -146,3 +146,22 @@ class Jira(AtlassianRestAPI):
     def get_issue_status(self, issuekey):
         url = '/rest/api/2/issue/{issuekey}?fields=status'.format(issuekey=issuekey)
         return self.get(url)['fields']['status']['name']
+
+    def issue_get_issue_link_types(self):
+        url = '/rest/api/2/issueLinkType'
+        return self.get(url)['issueLinkTypes']
+
+    def issue_get_issue_link_types_names(self):
+        _ = [type['name'] for type in self.issue_get_issue_link_types()]
+        return _
+
+    def issue_create_link(self, inwardIssueKey, outwardIssueKey, typeName):
+        url = '/rest/api/2/issueLink'
+
+        assert typeName.lower() in [t.lower() for t in self.issue_get_issue_link_types_names()]
+
+        return self.post(url, data={
+            'type': {'name': typeName},
+            'inwardIssue': {'key': inwardIssueKey},
+            'outwardIssue': {'key': outwardIssueKey}
+        })
