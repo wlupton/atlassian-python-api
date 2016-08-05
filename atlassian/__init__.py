@@ -11,7 +11,7 @@ log = logging.getLogger("atlassian")
 class AtlassianRestAPI:
     """See https://docs.atlassian.com/jira/REST/latest/#api/2/
     """
-    def __init__(self, url, username, password, verifySSL=True):
+    def __init__(self, url, username, password, verifySSL=False):
         self.url = url
         self.username = username
         self.password = password
