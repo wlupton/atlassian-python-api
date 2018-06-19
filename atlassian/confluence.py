@@ -23,12 +23,20 @@ class Confluence(AtlassianRestAPI):
     def get_page_space(self, page_id):
         return self.get_page_by_id(page_id, expand='space')['space']['key']
 
-    def get_page_by_title(self, space, title):
-        url = '/rest/api/content?spaceKey={space}&title={title}'.format(space=space, title=title)
-        return self.get(url)['results'][0]
+    def get_page_by_title(self, space, title, status='current',
+                          representation='storage'):
+        url = '/rest/api/content?spaceKey={space}&title={title}&' \
+              'status={status}&expand=body.{representation}'.format(
+                space=space, title=title, status=status,
+                representation=representation)
+        results = self.get(url)['results']
+        return results if len(results) > 1 else results[0] if results else None
 
-    def get_page_by_id(self, page_id, expand=None):
-        url = '/rest/api/content/{page_id}?expand={expand}'.format(page_id=page_id, expand=expand)
+    def get_page_by_id(self, page_id, status='current',
+                       representation='storage'):
+        url = '/rest/api/content/{page_id}?status={status}&expand=body.{' \
+              'representation}'.format(page_id=page_id, status=status,
+                                       representation=representation)
         return self.get(url)
 
     def create_page(self, space, parent_id, title, body, type='page'):
