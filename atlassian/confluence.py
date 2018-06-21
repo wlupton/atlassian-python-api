@@ -17,26 +17,38 @@ class Confluence(AtlassianRestAPI):
             log.info('Page "{title}" does not exist in space "{space}"'.format(space=space, title=title))
             return False
 
+    def get_page_title(self, page_id):
+        page = self.get_page_by_id(page_id)
+        return page.get('title') if page else None
+
     def get_page_id(self, space, title):
-        return self.get_page_by_title(space, title).get('id')
+        page = self.get_page_by_title(space, title)
+        return page.get('id') if page else None
 
     def get_page_space(self, page_id):
-        return self.get_page_by_id(page_id, expand='space')['space']['key']
+        page = self.get_page_by_id(page_id, expand='space')
+        return page['space']['key'] if page else None
 
     def get_page_by_title(self, space, title, status='current',
-                          representation='storage'):
+                          representation='storage', expand=None):
+        expand = expand + ',' if expand else ''
+        expand += 'body.{representation}'.format(representation=representation)
         url = '/rest/api/content?spaceKey={space}&title={title}&' \
-              'status={status}&expand=body.{representation}'.format(
-                space=space, title=title, status=status,
-                representation=representation)
-        results = self.get(url)['results']
-        return results if len(results) > 1 else results[0] if results else None
+              'status={status}&expand={expand}'.format(space=space,
+                                                       title=title,
+                                                       status=status,
+                                                       expand=expand)
+        page = self.get(url)
+        results = page['results'] if page else None
+        return None if not results else results[0] if len(
+                results) == 1 else results
 
     def get_page_by_id(self, page_id, status='current',
-                       representation='storage'):
-        url = '/rest/api/content/{page_id}?status={status}&expand=body.{' \
-              'representation}'.format(page_id=page_id, status=status,
-                                       representation=representation)
+                       representation='storage', expand=None):
+        expand = expand + ',' if expand else ''
+        expand += 'body.{representation}'.format(representation=representation)
+        url = '/rest/api/content/{page_id}?status={status}&expand={expand}'.\
+            format(page_id=page_id, status=status, expand=expand)
         return self.get(url)
 
     def create_page(self, space, parent_id, title, body, type='page'):
@@ -67,10 +79,16 @@ class Confluence(AtlassianRestAPI):
             log.info('Content of {page_id} differs'.format(page_id=page_id))
             return False
 
-    def update_page(self, parent_id, page_id, title, body, type='page'):
+    def update_page(self, parent_id, page_id, title, body, type='page',
+                    is_already_updated=None):
         log.info('Updating {type} "{title}"'.format(title=title, type=type))
 
-        if self.is_page_content_is_already_updated(page_id, body):
+        if is_already_updated is None:
+            def is_already_updated(self_, page_id_, body_):
+                return self_.is_page_content_is_already_updated(page_id_,
+                                                                body_)
+
+        if is_already_updated(self, page_id, body):
             return self.get_page_by_id(page_id)
         else:
             version = self.history(page_id)['lastUpdated']['number'] + 1
