@@ -37,7 +37,11 @@ class Confluence(AtlassianRestAPI):
         url = '/rest/api/content/search?cql={cql}&expand={expand}'.format(cql=cql, expand=expand)
         if start is not None: url += '&start={start}'.format(start=start)
         if limit is not None: url += '&limit={limit}'.format(limit=limit)
-        items = self.get(url)
+        try:
+            items = self.get(url)
+        except Exception as e:
+            log.error('Exception: %s' % e)
+            items = None
         return None if not items else items if details else items['results']
 
     def page_exists(self, space, title):
