@@ -1,3 +1,4 @@
+import json
 import logging
 import urllib.parse
 from requests.exceptions import HTTPError
@@ -44,6 +45,21 @@ class Confluence(AtlassianRestAPI):
             items = None
         return None if not items else items if details else items['results']
 
+    def get_space(self, space, expand=None):
+        expand = expand + ',' if expand else ''
+        url = '/rest/api/space/{space}?expand={expand}'.format(
+                space=space, expand=expand)
+        return self.get(url)
+
+    def get_space_content(self, space, expand=None, start=None, limit=None):
+        expand = expand + ',' if expand else ''
+        start = '&start={start}'.format(start=start) if start else ''
+        limit = '&limit={limit}'.format(limit=limit) if limit else ''
+        url = '/rest/api/space/{space}/content?expand={expand}{start}{' \
+              'limit}'.format(space=space, expand=expand, start=start,
+                              limit=limit)
+        return self.get(url)
+
     def page_exists(self, space, title):
         try:
             self.get_page_by_title(space, title)
@@ -66,26 +82,76 @@ class Confluence(AtlassianRestAPI):
         return page['space']['key'] if page else None
 
     def get_page_by_title(self, space, title, status='current',
-                          representation='storage', expand=None):
+                          representation='storage', expand=None, limit=None):
         expand = expand + ',' if expand else ''
-        expand += 'body.{representation}'.format(representation=representation)
+        if representation:
+            expand += 'body.{representation}'.format(
+                    representation=representation)
+        limit = '&limit={limit}'.format(limit=limit) if limit else ''
         url = '/rest/api/content?spaceKey={space}&title={title}&' \
-              'status={status}&expand={expand}'.format(space=space,
-                                                       title=title,
-                                                       status=status,
-                                                       expand=expand)
+              'status={status}&expand={expand}{limit}'.format(space=space,
+                                                              title=title,
+                                                              status=status,
+                                                              expand=expand,
+                                                              limit=limit)
         page = self.get(url)
         results = page['results'] if page else None
         return None if not results else results[0] if len(
                 results) == 1 else results
 
     def get_page_by_id(self, page_id, status='current',
-                       representation='storage', expand=None):
+                       representation='storage', expand=None, limit=None):
         expand = expand + ',' if expand else ''
-        expand += 'body.{representation}'.format(representation=representation)
-        url = '/rest/api/content/{page_id}?status={status}&expand={expand}'.\
-            format(page_id=page_id, status=status, expand=expand)
+        if representation:
+            expand += 'body.{representation}'.format(
+                    representation=representation)
+        limit = '&limit={limit}'.format(limit=limit) if limit else ''
+        url = '/rest/api/content/{page_id}?status={status}&expand={expand}' \
+              '{limit}'.format(page_id=page_id, status=status, expand=expand,
+                               limit=limit)
         return self.get(url)
+
+    # alternative: use get_page_xxx() with appropriate 'expand'
+    def get_page_restrictions(self, page_id, expand=None):
+        expand = expand + ',' if expand else ''
+        url = '/rest/api/content/{page_id}/restriction/byOperation?expand=' \
+              '{expand}'.format(page_id=page_id, expand=expand)
+        return self.get(url)
+
+    # XXX this uses an experimental API
+    def add_page_restrictions(self, page_id, operation, groups=None,
+                              users=None):
+        assert operation in {'read', 'update'}
+        url = '/rest/experimental/content/{page_id}/restriction'.format(
+                page_id=page_id)
+        groups = [{'type': 'group', 'name': group} for group in (groups or [])]
+        users = [{'type': 'known', 'username': user} for user in (users or [])]
+        data = [{"operation": operation, "restrictions": {"group": groups,
+                                                           "user": users}}]
+        return self.post(url, data=data)
+
+    # XXX this uses an experimental API
+    def delete_page_restrictions(self, page_id, operation, groups=None,
+                                 users=None):
+        assert operation in {'read', 'update'}
+        urls = []
+        for group in (groups or []):
+            urls += ['/rest/experimental/content/{page_id}/restriction/' \
+                     'byOperation/{operation}/group/{group}'.format(
+                    page_id=page_id, operation=operation, group=group)]
+        for user in (users or []):
+            urls += ['/rest/experimental/content/{page_id}/restriction/' \
+                     'byOperation/{operation}/user?userName={user}'.format(
+                    page_id=page_id, operation=operation, user=user)]
+
+        # DELETE returns 200 with no response body, which is (of course)
+        # invalid JSON; so catch and ignore this case
+        for url in urls:
+            try:
+                self.delete(url)
+            except json.decoder.JSONDecodeError as e:
+                if e.doc != '':
+                    raise e
 
     def create_page(self, space, parent_id, title, body, type='page'):
         log.info('Creating {type} "{space}" -> "{title}"'.format(space=space, title=title, type=type))
