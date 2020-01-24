@@ -51,6 +51,13 @@ class Confluence(AtlassianRestAPI):
                 space=space, expand=expand)
         return self.get(url)
 
+    def get_space_property(self, space, expand=None):
+        expand = expand + ',' if expand else ''
+        url = '/rest/api/space/{space}/property?expand={expand}'.format(
+                space=space,
+                expand=expand)
+        return self.get(url)
+
     def get_space_content(self, space, expand=None, start=None, limit=None):
         expand = expand + ',' if expand else ''
         start = '&start={start}'.format(start=start) if start else ''
