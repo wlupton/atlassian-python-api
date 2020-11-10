@@ -45,10 +45,12 @@ class Confluence(AtlassianRestAPI):
             items = None
         return None if not items else items if details else items['results']
 
-    def get_space(self, space, expand=None):
+    def get_space(self, space, expand=None, type=None, status=None):
         expand = expand + ',' if expand else ''
-        url = '/rest/api/space/{space}?expand={expand}'.format(
-                space=space, expand=expand)
+        type = '&type=%s' % type if type else ''
+        status = '&status=%s' % status if status else ''
+        url = '/rest/api/space/{space}?expand={expand}{type}{status}'.format(
+                space=space, expand=expand, type=type, status=status)
         return self.get(url)
 
     def get_space_property(self, space, expand=None):
